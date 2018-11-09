@@ -5,6 +5,7 @@ import gym
 from collections import defaultdict
 import tensorflow as tf
 import numpy as np
+import aspygym
 
 from baselines.common.vec_env.vec_video_recorder import VecVideoRecorder
 from baselines.common.vec_env.vec_frame_stack import VecFrameStack
