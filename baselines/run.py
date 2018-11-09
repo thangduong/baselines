@@ -195,7 +195,8 @@ def main():
     else:
         logger.configure(format_strs=[])
         rank = MPI.COMM_WORLD.Get_rank()
-
+    print(args)
+    print(extra_args)
     model, env = train(args, extra_args)
     env.close()
 

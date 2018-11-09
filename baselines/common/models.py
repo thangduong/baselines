@@ -26,7 +26,6 @@ def nature_cnn(unscaled_images, **conv_kwargs):
     h3 = conv_to_fc(h3)
     return activ(fc(h3, 'fc1', nh=512, init_scale=np.sqrt(2)))
 
-
 @register("mlp")
 def mlp(num_layers=2, num_hidden=64, activation=tf.tanh, layer_norm=False):
     """
@@ -65,6 +64,20 @@ def cnn(**conv_kwargs):
         return nature_cnn(X, **conv_kwargs)
     return network_fn
 
+@register("cnn_1d")
+def cnn_qd(**conv_kwargs):
+    def network_fn(X):
+        net = X
+        net = layers.conv1d(net, 5, 3, scope='cnn1d_c1')
+        net = layers.conv1d(net, 5, 3, scope='cnn1d_c2')
+        net = layers.conv1d(net, 1, 3, scope='cnn1d_c3')
+        net = tf.reshape(net, [-1,10])
+        net = fc(net, 'cnn1d_fc1', nh=16, init_scale=np.sqrt(2))
+        net = tf.tanh(net)
+#        tf.nn.conv1d(X, w, stride, 'SAME')
+#        print(X)
+        return net
+    return network_fn
 
 @register("cnn_small")
 def cnn_small(**conv_kwargs):
