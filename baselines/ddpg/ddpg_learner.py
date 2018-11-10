@@ -331,9 +331,13 @@ class DDPG(object):
 
         return critic_loss, actor_loss
 
-    def initialize(self, sess):
+    def initialize(self, sess, restore=False, ckpt_path=""):
         self.sess = sess
-        self.sess.run(tf.global_variables_initializer())
+        if restore and len(ckpt_file)>0:
+            saver = tf.train.Saver()
+            saver.restore(sess, ckpt_path)
+        else:
+            self.sess.run(tf.global_variables_initializer())
         self.actor_optimizer.sync()
         self.critic_optimizer.sync()
         self.sess.run(self.target_init_updates)

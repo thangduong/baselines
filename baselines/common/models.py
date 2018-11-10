@@ -67,11 +67,12 @@ def cnn(**conv_kwargs):
 @register("cnn_1d")
 def cnn_qd(**conv_kwargs):
     def network_fn(X):
+        buffer_size = X.shape[1]
         net = X
         net = layers.conv1d(net, 5, 3, scope='cnn1d_c1')
         net = layers.conv1d(net, 5, 3, scope='cnn1d_c2')
         net = layers.conv1d(net, 1, 3, scope='cnn1d_c3')
-        net = tf.reshape(net, [-1,10])
+        net = tf.reshape(net, [-1,buffer_size])
         net = fc(net, 'cnn1d_fc1', nh=16, init_scale=np.sqrt(2))
         net = tf.tanh(net)
 #        tf.nn.conv1d(X, w, stride, 'SAME')

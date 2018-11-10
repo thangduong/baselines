@@ -2,7 +2,7 @@ import os
 import time
 from collections import deque
 import pickle
-
+import tensorflow as tf
 from baselines.ddpg.ddpg_learner import DDPG
 from baselines.ddpg.models import Actor, Critic
 from baselines.ddpg.memory import Memory
@@ -42,6 +42,9 @@ def learn(network, env,
           tau=0.01,
           eval_env=None,
           param_noise_adaption_interval=50,
+          save_ckpt=False,
+          restore_ckpt=False,
+          ckpt_path="",
           **network_kwargs):
 
     set_global_seeds(seed)
@@ -97,8 +100,9 @@ def learn(network, env,
     eval_episode_rewards_history = deque(maxlen=100)
     episode_rewards_history = deque(maxlen=100)
     sess = U.get_session()
+    saver = tf.train.Saver()
     # Prepare everything.
-    agent.initialize(sess)
+    agent.initialize(sess, restore_ckpt, ckpt_path)
     sess.graph.finalize()
 
     agent.reset()
@@ -205,6 +209,12 @@ def learn(network, env,
                             eval_episode_rewards.append(eval_episode_reward[d])
                             eval_episode_rewards_history.append(eval_episode_reward[d])
                             eval_episode_reward[d] = 0.0
+
+        if save_ckpt:
+            # save checkpoint
+            save_path = os.path.join(ckpt_path, 'checkpoint', '{}_reach.ckpt'.format(epoch_episodes))
+            print("saving to %s" % save_path)
+            saver.save(sess, save_path)
 
         if MPI is not None:
             mpi_size = MPI.COMM_WORLD.Get_size()
