@@ -128,7 +128,12 @@ def learn(network, env,
     epoch_actions = []
     epoch_qs = []
     epoch_episodes = 0
-    for epoch in range(nb_epochs):
+    epoch = 0
+    done = False
+    while not done:
+        if nb_epochs > 0 and epoch >= nb_epochs:
+            done = True
+#    for epoch in range(nb_epochs):
         for cycle in range(nb_epoch_cycles):
             # Perform rollouts.
             if nenvs > 1:
@@ -278,6 +283,6 @@ def learn(network, env,
             if eval_env and hasattr(eval_env, 'get_state'):
                 with open(os.path.join(logdir, 'eval_env_state.pkl'), 'wb') as f:
                     pickle.dump(eval_env.get_state(), f)
-
+        epoch += 1
 
     return agent
