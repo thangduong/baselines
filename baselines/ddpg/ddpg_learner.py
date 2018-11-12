@@ -334,6 +334,7 @@ class DDPG(object):
 
     def initialize(self, sess, restore=False, ckpt_path=""):
         self.sess = sess
+        restored_from_file = False
         if restore and len(ckpt_path)>0:
             saver = tf.train.Saver()
 
@@ -343,9 +344,10 @@ class DDPG(object):
                 latest_checkpoint = tf.train.latest_checkpoint(ckpt_path_checkpoint)
                 print("Has checkpoint.  RESTORING %s"%latest_checkpoint)
                 saver.restore(sess, latest_checkpoint)
+                restored_from_file = True
             else:
                 print("Has no checkpoint.  SKIPPING RESTORATION OF %s"%ckpt_path)
-        else:
+        if not restored_from_file:
             self.sess.run(tf.global_variables_initializer())
         self.actor_optimizer.sync()
         self.critic_optimizer.sync()
