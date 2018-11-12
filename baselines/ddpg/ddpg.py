@@ -45,6 +45,7 @@ def learn(network, env,
           save_ckpt=False,
           restore_ckpt=False,
           ckpt_path="",
+        skip_training=False,
           **network_kwargs):
 
     set_global_seeds(seed)
@@ -128,10 +129,10 @@ def learn(network, env,
     epoch_qs = []
     epoch_episodes = 0
     epoch = 0
-    done = False
-    while not done:
+    training_done = False
+    while not training_done and not skip_training:
         if nb_epochs > 0 and epoch >= nb_epochs:
-            done = True
+            training_done = True
 #    for epoch in range(nb_epochs):
         for cycle in range(nb_epoch_cycles):
             # Perform rollouts.

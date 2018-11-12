@@ -208,11 +208,12 @@ def main():
         logger.log("Running trained model")
         env = build_env(args)
         obs = env.reset()
-        def initialize_placeholders(nlstm=128,**kwargs):
-            return np.zeros((args.num_env or 1, 2*nlstm)), np.zeros((1))
-        state, dones = initialize_placeholders(**extra_args)
+        #def initialize_placeholders(nlstm=128,**kwargs):
+        #    return np.zeros((args.num_env or 1, 2*nlstm)), np.zeros((1))
+        #state, dones = initialize_placeholders(**extra_args)
         while True:
-            actions, _, state, _ = model.step(obs,S=state, M=dones)
+            actions, _, state, _ = model.step(obs,apply_noise=False)#,S=state, M=dones)
+            env.render()
             obs, _, done, _ = env.step(actions)
             env.render()
             done = done.any() if isinstance(done, np.ndarray) else done

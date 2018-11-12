@@ -257,7 +257,8 @@ class DDPG(object):
         self.stats_ops = ops
         self.stats_names = names
 
-    def step(self, obs, apply_noise=True, compute_Q=True):
+    def step(self, obs, apply_noise=True, compute_Q=True,S=None, M=None):
+#        print("S=%s M=%s"%(S,M))
         if self.param_noise is not None and apply_noise:
             actor_tf = self.perturbed_actor_tf
         else:
