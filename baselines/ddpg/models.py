@@ -22,30 +22,38 @@ class Model(object):
 
 class Actor(Model):
     def __init__(self, nb_actions, name='actor', network='mlp', **network_kwargs):
+        network = '%s.actor'%network
+        self._network_name = network
         super().__init__(name=name, network=network, **network_kwargs)
         self.nb_actions = nb_actions
 
     def __call__(self, obs, reuse=False):
         with tf.variable_scope(self.name, reuse=tf.AUTO_REUSE):
-            x = self.network_builder(obs)
-            x = tf.layers.dense(x, self.nb_actions, kernel_initializer=tf.random_uniform_initializer(minval=-3e-3, maxval=3e-3))
-            x = tf.nn.tanh(x)
+            if self._network_name == 'simple_rms':
+                x = self.network_builder(obs) * 2
+                print(x)
+                x = tf.reshape(x, [-1,1])
+                print(x)
+            else:
+                x = self.network_builder(obs)
+                x = tf.layers.dense(x, self.nb_actions, kernel_initializer=tf.random_uniform_initializer(minval=-3e-3, maxval=3e-3))
+                x = tf.nn.tanh(x)
         return x
 
 
 class Critic(Model):
     def __init__(self, name='critic', network='mlp', **network_kwargs):
-        network='mlp'
+        network = '%s.critic'%network
+        self._network=network
         super().__init__(name=name, network=network, **network_kwargs)
         self.layer_norm = True
 
     def __call__(self, obs, action, reuse=False):
         with tf.variable_scope(self.name, reuse=tf.AUTO_REUSE):
-            obs = tf.layers.flatten(obs)
-            x = tf.concat([obs, action], axis=-1) # this assumes observation and action can be concatenated
-            x = self.network_builder(x)
+#            obs = tf.layers.flatten(obs)
+#            x = tf.concat([obs, action], axis=-1) # this assumes observation and action can be concatenated
+            x = self.network_builder(obs, action)
             x = tf.layers.dense(x, 1, kernel_initializer=tf.random_uniform_initializer(minval=-3e-3, maxval=3e-3))
-
 #            x = obs
 #            x = self.network_builder(x)
 #            x = tf.concat([x, action], axis=-1)

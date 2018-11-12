@@ -4,7 +4,7 @@ from functools import reduce
 import numpy as np
 import tensorflow as tf
 import tensorflow.contrib as tc
-
+import os
 from baselines import logger
 from baselines.common.mpi_adam import MpiAdam
 import baselines.common.tf_util as U
@@ -333,9 +333,17 @@ class DDPG(object):
 
     def initialize(self, sess, restore=False, ckpt_path=""):
         self.sess = sess
-        if restore and len(ckpt_file)>0:
+        if restore and len(ckpt_path)>0:
             saver = tf.train.Saver()
-            saver.restore(sess, ckpt_path)
+
+            ckpt_path_checkpoint = os.path.join(ckpt_path, 'checkpoint')
+            if os.path.isdir(ckpt_path_checkpoint):
+                # find latest ch eckpoint
+                latest_checkpoint = tf.train.latest_checkpoint(ckpt_path_checkpoint)
+                print("Has checkpoint.  RESTORING %s"%latest_checkpoint)
+                saver.restore(sess, latest_checkpoint)
+            else:
+                print("Has no checkpoint.  SKIPPING RESTORATION OF %s"%ckpt_path)
         else:
             self.sess.run(tf.global_variables_initializer())
         self.actor_optimizer.sync()

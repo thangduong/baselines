@@ -57,6 +57,16 @@ def mlp(num_layers=2, num_hidden=64, activation=tf.tanh, layer_norm=False):
 
     return network_fn
 
+@register("simple_rms")
+def simple_rms(**simple_rms_kwargs):
+    def network_fn(X):
+        # receive_rate * .9 - send_rate
+        # change = X[-1][3] - X[-1][5]
+        received_rate = X[:,-1,3]
+        send_rate = X[:,-1,5]
+        delta = received_rate * tf.Variable([1.0]) - send_rate
+        return delta
+    return network_fn
 
 @register("cnn")
 def cnn(**conv_kwargs):
@@ -80,6 +90,79 @@ def cnn_qd(**conv_kwargs):
         return net
     return network_fn
 
+@register("cnn_1d_small_ac.actor")
+def cnn_qd1(**conv_kwargs):
+    def network_fn(X):
+        buffer_size = X.shape[1]
+        net = X
+        net = layers.conv1d(net, 5, 3, scope='cnn1d_c1')
+        net = layers.conv1d(net, 5, 3, scope='cnn1d_c2')
+        net = layers.conv1d(net, 1, 3, scope='cnn1d_c3')
+        net = tf.reshape(net, [-1,buffer_size])
+        net = fc(net, 'cnn1d_fc1', nh=16, init_scale=np.sqrt(2))
+        net = tf.tanh(net)
+#        tf.nn.conv1d(X, w, stride, 'SAME')
+#        print(X)
+        return net
+    return network_fn
+
+@register("cnn_1d_small_ac.critic")
+def cnn_qd1(**conv_kwargs):
+    def network_fn(X, action):
+        buffer_size = X.shape[1]
+        net = X
+        net = layers.conv1d(net, 5, 3, scope='cnn1d_c1')
+        net = layers.conv1d(net, 5, 3, scope='cnn1d_c2')
+        net = layers.conv1d(net, 1, 3, scope='cnn1d_c3')
+        net = tf.reshape(net, [-1,buffer_size])
+        net = tf.concat([net,action], 1)
+        net = fc(net, 'cnn1d_fc1', nh=32, init_scale=np.sqrt(2))
+        net = fc(net, 'cnn1d_fc3', nh=16, init_scale=np.sqrt(2))
+        net = tf.tanh(net)
+#        tf.nn.conv1d(X, w, stride, 'SAME')
+#        print(X)
+        return net
+    return network_fn
+
+@register("cnn_1d_ac.actor")
+def cnn_qd1(**conv_kwargs):
+    def network_fn(X):
+        buffer_size = X.shape[1]
+        net = X
+        net = layers.conv1d(net, 20, 5, scope='cnn1d_c1')
+        net = layers.conv1d(net, 15, 3, scope='cnn1d_c2')
+        net = layers.conv1d(net, 10, 3, scope='cnn1d_c3')
+        net = layers.conv1d(net, 5, 3, scope='cnn1d_c4')
+        net = layers.conv1d(net, 1, 3, scope='cnn1d_c5')
+        net = tf.reshape(net, [-1,buffer_size])
+        net = fc(net, 'cnn1d_fc1', nh=16, init_scale=np.sqrt(2))
+        net = tf.tanh(net)
+#        tf.nn.conv1d(X, w, stride, 'SAME')
+#        print(X)
+        return net
+    return network_fn
+
+@register("cnn_1d_ac.critic")
+def cnn_qd1(**conv_kwargs):
+    def network_fn(X, action):
+        buffer_size = X.shape[1]
+        net = X
+        net = layers.conv1d(net, 20, 5, scope='cnn1d_c1')
+        net = layers.conv1d(net, 15, 3, scope='cnn1d_c2')
+        net = layers.conv1d(net, 10, 3, scope='cnn1d_c3')
+        net = layers.conv1d(net, 5, 3, scope='cnn1d_c4')
+        net = layers.conv1d(net, 1, 3, scope='cnn1d_c5')
+        net = tf.reshape(net, [-1,buffer_size])
+        net = tf.concat([net,action], 1)
+        net = fc(net, 'cnn1d_fc1', nh=32, init_scale=np.sqrt(2))
+        net = fc(net, 'cnn1d_fc2', nh=24, init_scale=np.sqrt(2))
+        net = fc(net, 'cnn1d_fc3', nh=16, init_scale=np.sqrt(2))
+        net = tf.tanh(net)
+#        tf.nn.conv1d(X, w, stride, 'SAME')
+#        print(X)
+        return net
+    return network_fn
+
 @register("cnn_1d_v1")
 def cnn_qd1(**conv_kwargs):
     def network_fn(X):
@@ -97,6 +180,7 @@ def cnn_qd1(**conv_kwargs):
 #        print(X)
         return net
     return network_fn
+
 
 @register("cnn_small")
 def cnn_small(**conv_kwargs):
