@@ -100,7 +100,6 @@ def learn(network, env,
     eval_episode_rewards_history = deque(maxlen=100)
     episode_rewards_history = deque(maxlen=100)
     sess = U.get_session()
-    saver = tf.train.Saver()
     # Prepare everything.
     agent.initialize(sess, restore_ckpt, ckpt_path)
     sess.graph.finalize()
@@ -218,8 +217,7 @@ def learn(network, env,
         if save_ckpt:
             # save checkpoint
             save_path = os.path.join(ckpt_path, 'checkpoint', '{}_reach.ckpt'.format(epoch_episodes))
-            print("saving to %s" % save_path)
-            saver.save(sess, save_path)
+            agent.save(save_path)
 
         if MPI is not None:
             mpi_size = MPI.COMM_WORLD.Get_size()
@@ -284,5 +282,7 @@ def learn(network, env,
                 with open(os.path.join(logdir, 'eval_env_state.pkl'), 'wb') as f:
                     pickle.dump(eval_env.get_state(), f)
         epoch += 1
+
+    print("nb_epochs = %s epoch = %s" % (nb_epochs, epoch))
 
     return agent

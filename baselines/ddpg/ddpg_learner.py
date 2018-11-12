@@ -340,6 +340,7 @@ class DDPG(object):
             self.sess.run(tf.global_variables_initializer())
         self.actor_optimizer.sync()
         self.critic_optimizer.sync()
+        self._saver = tf.train.Saver()
         self.sess.run(self.target_init_updates)
 
     def update_target_net(self):
@@ -404,3 +405,7 @@ class DDPG(object):
             self.sess.run(self.perturb_policy_ops, feed_dict={
                 self.param_noise_stddev: self.param_noise.current_stddev,
             })
+
+    def save(self, save_path):
+        print("saving to %s" % save_path)
+        self._saver.save(self.sess, save_path)
